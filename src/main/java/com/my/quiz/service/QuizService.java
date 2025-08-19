@@ -5,10 +5,12 @@ import com.my.quiz.dto.QuizDto;
 import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.entity.QuizResultEntity;
 import com.my.quiz.repository.QuizRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class QuizService {
 private QuizRepository quizRepository;
 

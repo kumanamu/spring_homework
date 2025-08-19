@@ -2,9 +2,11 @@ package com.my.quiz.service;
 
 import com.my.quiz.entity.QuizResultEntity;
 import com.my.quiz.repository.QuizResultRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class QuizResultService {
 
     private QuizResultRepository quizResultRepository;

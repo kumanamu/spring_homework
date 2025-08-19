@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>퀴즈 시스템</title>
@@ -8,13 +8,12 @@
 <body>
 <h1>퀴즈 시스템</h1>
 <div>
-    <u1>
+    <ul>
         <li><a th:href="@{/quiz}">퀴즈 풀기</a></li>
         <li><a th:href="@{/result/list}">내 결과 보기</a></li>
-        <li><a th:href="@{/user/register}">회원가입</a></li>
+        <li><a th:href="@{/user/join}">회원가입</a></li>
         <li><a th:href="@{/user/list}">회원 목록</a></li>
-    </u1>
-
+    </ul>
 </div>
 </body>
 </html>

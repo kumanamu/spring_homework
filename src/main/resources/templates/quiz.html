@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>퀴즈 풀기</title>
@@ -9,11 +9,11 @@
 <h1>퀴즈 문제</h1>
 
 <form th:action="@{/result/save}" method="post">
-    <div th:each="quiz : ${quizzes}">
+    <div th:each="quiz, iterStat : ${quizzes}">
         <p th:text="${quiz.question}">문제 내용</p>
-        <input type="hidden" th:name="quizId" th:value="${quiz.id}">
+        <input type="hidden" th:name="quizIds" th:value="${quiz.id}">
         <input type="hidden" th:name="userId" th:value="${user.id}">
-        <label>답: <input type="text" th:name="answer"></label>
+        <label>답: <input type="text" th:name="answers"></label>
     </div>
     <button type="submit">제출</button>
 </form>

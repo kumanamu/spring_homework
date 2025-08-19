@@ -3,11 +3,12 @@ package com.my.quiz.service;
 import com.my.quiz.dto.UserDto;
 import com.my.quiz.entity.UserEntity;
 import com.my.quiz.repository.UserRepository;
-import org.apache.catalina.User;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class UserService {
 
     private UserRepository userRepository;
@@ -31,11 +32,8 @@ public class UserService {
         return userRepository.findById(userId);
     }
 
-    public List<UserEntity> getAllusers(){
+    public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
-    }
 
-    public List<UserDto> getAllUsers() {
-        return null;
     }
 }
