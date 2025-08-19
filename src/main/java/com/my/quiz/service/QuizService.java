@@ -2,6 +2,8 @@ package com.my.quiz.service;
 
 
 import com.my.quiz.dto.QuizDto;
+import com.my.quiz.entity.QuizEntity;
+import com.my.quiz.entity.QuizResultEntity;
 import com.my.quiz.repository.QuizRepository;
 
 import java.util.List;
@@ -14,23 +16,23 @@ public QuizService(QuizRepository quizRepository){
     this.quizRepository = quizRepository;
 }
 
-public  QuizDto addQuiz(QuizDto quizDto) {
-    return quizRepository.save(quizDto);
+public  QuizEntity addQuiz(QuizEntity quizEntity) {
+    return quizRepository.save(quizEntity);
 
 }
 
-public  QuizDto updateQuiz(QuizDto quizDto){
-    return quizRepository.save(quizDto);
+public QuizEntity updateQuiz(QuizEntity quizEntity){
+    return quizRepository.save(quizEntity);
 }
 
 public void deleteQuiz(Long quizId){
     quizRepository.deleteById(quizId);
 }
-public Optional<QuizDto> getQuiz(Long quizId) {
+public Optional<QuizEntity> getQuiz(Long quizId) {
 return quizRepository.findById(quizId);
 
 }
-public List<QuizDto> getAllQuizzes(){
+public List<QuizEntity> getAllQuizzes(){
     return quizRepository.findAll();
 }
 }

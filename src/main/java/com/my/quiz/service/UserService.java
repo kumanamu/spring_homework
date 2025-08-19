@@ -1,5 +1,7 @@
 package com.my.quiz.service;
 
+import com.my.quiz.dto.UserDto;
+import com.my.quiz.entity.UserEntity;
 import com.my.quiz.repository.UserRepository;
 import org.apache.catalina.User;
 
@@ -13,23 +15,27 @@ public class UserService {
     this.userRepository = userRepository;
     }
 
-    public User joinUser(User user){
-        return userRepository.save(user);
+    public UserEntity joinUser(UserEntity userEntity){
+        return userRepository.save(userEntity);
     }
 
-    public User updateUser(User user){
-        return userRepository.save(user);
+    public UserEntity updateUser(UserEntity userEntity){
+        return userRepository.save(userEntity);
     }
 
     public void deleteUser(Long userId){
         userRepository.deleteById(userId);
     }
 
-    public Optional<User> getUser(Long userId){
+    public Optional<UserEntity> getUser(Long userId){
         return userRepository.findById(userId);
     }
 
-    public List<User> getAllusers(){
+    public List<UserEntity> getAllusers(){
         return userRepository.findAll();
+    }
+
+    public List<UserDto> getAllUsers() {
+        return null;
     }
 }

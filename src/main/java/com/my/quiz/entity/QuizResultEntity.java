@@ -18,17 +18,11 @@ public class QuizResultEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
 
     private int score;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name= "user_id", nullable = false)
-    private UserEntity user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="quiz_id", nullable = false)
-    private QuizEntity quiz;
+    @Column(name= "user_id")
+    private Long userId;
+    private boolean correct;
 
     private LocalDateTime createdAt;
 }

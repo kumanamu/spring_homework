@@ -1,5 +1,7 @@
 package com.my.quiz.controller;
 
+import com.my.quiz.dto.UserDto;
+import com.my.quiz.entity.UserEntity;
 import com.my.quiz.service.UserService;
 import org.apache.catalina.User;
 import org.springframework.stereotype.Controller;
@@ -14,28 +16,29 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private UserEntity user;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     // 회원가입 페이지
-    @GetMapping("/register")
+    @GetMapping("/join")
     public String showRegisterForm() {
         return "userRegister"; // userRegister.html
     }
 
     // 회원가입 처리
-    @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        userService.registerUser(user);
+    @PostMapping("/join")
+    public String registerUser(@ModelAttribute UserDto userDto) {
+        userService.joinUser(user);
         return "redirect:/user/list";
     }
 
     // 회원 리스트
     @GetMapping("/list")
     public String listUsers(Model model) {
-        List<User> users = userService.getAllUsers();
+        List<UserDto> users = userService.getAllUsers();
         model.addAttribute("users", users);
         return "userList"; // userList.html
     }

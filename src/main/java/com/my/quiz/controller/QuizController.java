@@ -1,6 +1,7 @@
 package com.my.quiz.controller;
 
 import com.my.quiz.dto.QuizDto;
+import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.service.QuizService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,7 @@ public class QuizController {
     // 문제 리스트
     @GetMapping("/list")
     public String listQuizzes(Model model) {
-        List<QuizDto> quizzes = quizService.getAllQuizzes();
+        List<QuizEntity> quizzes = quizService.getAllQuizzes();
         model.addAttribute("quizzes", quizzes);
         return "quizList"; // quizList.html
     }
@@ -34,8 +35,8 @@ public class QuizController {
 
     // 문제 등록 처리
     @PostMapping("/add")
-    public String addQuiz(@ModelAttribute QuizDto quizDto) {
-        quizService.addQuiz(quizDto);
+    public String addQuiz(@ModelAttribute QuizEntity quizEntity) {
+        quizService.addQuiz(quizEntity);
         return "redirect:/quiz/list";
     }
 
