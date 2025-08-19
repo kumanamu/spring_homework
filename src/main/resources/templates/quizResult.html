@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>퀴즈 결과</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h1>퀴즈 결과</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>문제</th>
+        <th>답</th>
+        <th>점수</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="result : ${results}">
+        <td th:text="${result.quiz.question}">문제 내용</td>
+        <td th:text="${result.quiz.answer}">정답</td>
+        <td th:text="${result.score}">점수</td>
+    </tr>
+    </tbody>
+</table>
+
+<a th:href="@{/main}">메인으로</a>
+</body>
+</html>
