@@ -16,13 +16,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // 회원가입
-    public UserEntity register(String username, String password) {
+    /** 회원가입 (DTO 기반) */
+    public UserEntity register(UserDto dto) {
         UserEntity user = new UserEntity();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(null);
-        user.setAdmin(false);
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setAdmin(dto.isAdmin());
         user.setStatus("PENDING");
         user.setAnswerTrue(0);
         user.setAnswerFalse(0);
@@ -31,7 +31,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // 로그인
+    /** 로그인 */
     public Optional<UserEntity> login(String username, String password) {
         Optional<UserEntity> user = userRepository.findByUsername(username);
         if (user.isPresent() && user.get().getPassword().equals(password) && "APPROVED".equals(user.get().getStatus())) {
@@ -40,7 +40,7 @@ public class UserService {
         return Optional.empty();
     }
 
-    // 비밀번호 수정
+    /** 비밀번호 수정 */
     public boolean updatePassword(Long userId, String newPassword) {
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -53,7 +53,7 @@ public class UserService {
         return false;
     }
 
-    // 회원 승인
+    /** 회원 승인 */
     public boolean approveUser(Long userId) {
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -61,8 +61,13 @@ public class UserService {
             user.setStatus("APPROVED");
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
-            return true; // 정상적으로 승인 처리됨
+            return true;
         }
-        return false; // 해당 유저가 없으면 false 반환
+        return false;
+    }
+
+    /** 모든 회원 조회 (관리자용) */
+    public List<UserEntity> findAll() {
+        return userRepository.findAll();
     }
 }

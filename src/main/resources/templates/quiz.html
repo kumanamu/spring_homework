@@ -2,38 +2,35 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>퀴즈 풀기</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="/css/main.css">
+    <script>
+        // 정답 제출
+        function submitAnswer(quizId) {
+            const userAnswer = document.getElementById('answer-' + quizId).value;
+            fetch('/results', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `userId=${document.getElementById('userId').value}&quizId=${quizId}&userAnswer=${userAnswer}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.correct ? "정답!" : "오답!");
+                location.reload();
+            })
+            .catch(error => console.error(error));
+        }
+    </script>
 </head>
 <body>
-<h1>퀴즈 문제</h1>
-
-<form th:action="@{/result/save}" method="post" id="quizForm">
-    <input type="hidden" name="userId" th:value="${userId}">
-    <div th:each="quiz : ${quizzes}">
-        <p th:text="${quiz.question}">문제 내용</p>
-        <label>답: <input type="text" class="answer-input"></label>
-        <input type="hidden" class="quiz-id" th:value="${quiz.id}">
-        <hr>
-    </div>
-
-    <!-- 제출 전 JS로 CSV로 묶어서 hidden에 담아 전송 -->
-    <input type="hidden" name="quizIds" id="quizIdsCsv">
-    <input type="hidden" name="answers" id="answersCsv">
-
-    <button type="submit">제출</button>
-</form>
-
-<script>
-    const form = document.getElementById('quizForm');
-    form.addEventListener('submit', function(){
-      const ids = Array.from(document.querySelectorAll('.quiz-id')).map(i=>i.value);
-      const answers = Array.from(document.querySelectorAll('.answer-input')).map(i=>i.value ?? '');
-      document.getElementById('quizIdsCsv').value = ids.join(',');
-      document.getElementById('answersCsv').value = answers.join(',');
-    });
-</script>
-
-<a th:href="@{/main}">메인으로</a>
+<h1>랜덤 퀴즈 풀기</h1>
+<input type="hidden" id="userId" th:value="${user.id}" />
+<div th:each="quiz : ${quizzes}">
+    <p><strong th:text="${quiz.question}"></strong></p>
+    <input type="text" th:id="'answer-' + ${quiz.id}" placeholder="답 입력">
+    <button th:onclick="'submitAnswer(' + ${quiz.id} + ')'">제출</button>
+    <hr>
+</div>
 </body>
 </html>

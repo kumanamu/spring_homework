@@ -2,38 +2,37 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>퀴즈 결과</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
 <h1>퀴즈 결과</h1>
 
+<!-- 사용자별 결과 -->
 <table border="1">
     <thead>
     <tr>
+        <th>사용자 ID</th>
         <th>문제</th>
-        <th>내 답</th>
-        <th>정답</th>
-        <th>점수</th>
-        <th>정오표시</th>
-        <th>시간</th>
+        <th>사용자 답</th>
+        <th>정답 여부</th>
+        <th>응시 시간</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="result : ${results}">
-        <td th:text="${result.quizQuestion}">문제 내용</td>
-        <td th:text="${result.userAnswer}">사용자 답</td>
-        <td th:text="${result.correctAnswer}">정답</td>
-        <td th:text="${result.score}">0</td>
-        <td th:text="${result.correct} ? 'O' : 'X'">O</td>
-        <td th:text="${#temporals.format(result.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+        <td th:text="${result.user.id}"></td>
+        <td th:text="${result.quiz.question}"></td>
+        <td th:text="${result.userAnswer}"></td>
+        <td th:text="${result.correct} ? '정답' : '오답'"></td>
+        <td th:text="${#dates.format(result.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
     </tr>
     </tbody>
 </table>
 
-<p>총 점수: <span th:text="${totalScore}">0</span></p>
+<hr>
 
-
-<a th:href="@{/main}">메인으로</a>
+<a href="/main.html">메인으로 돌아가기</a>
 </body>
 </html>

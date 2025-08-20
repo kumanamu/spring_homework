@@ -1,34 +1,54 @@
 package com.my.quiz.controller;
 
+import com.my.quiz.dto.QuizDto;
 import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/quizzes")
 public class QuizController {
 
+    private final QuizService quizService;
+
     @Autowired
-    private QuizService quizService;
+    public QuizController(QuizService quizService) {
+        this.quizService = quizService;
+    }
 
-    // 모든 문제 조회
+    /** 모든 문제 조회 (관리자 페이지 포함) */
     @GetMapping
-    public List<QuizEntity> getAll() {
-        return quizService.getAll();
+    @ResponseBody
+    public List<QuizEntity> getAllQuizzes() {
+        return quizService.getAllQuizzes();
     }
 
-    // 문제 추가
+    /** 문제 추가 */
     @PostMapping
+    @ResponseBody
     public QuizEntity addQuiz(@RequestParam String question, @RequestParam String answer) {
-        return quizService.addQuiz(question, answer);
+        QuizDto dto = new QuizDto();
+        dto.setQuestion(question);
+        dto.setAnswer(answer);
+        return quizService.createQuiz(dto);
     }
 
-    // 랜덤 문제 n개 가져오기
+    /** 랜덤 문제 가져오기 */
     @GetMapping("/random")
-    public List<QuizEntity> getRandom(@RequestParam(defaultValue = "5") int count) {
-        return quizService.getRandom(count);
+    @ResponseBody
+    public QuizEntity getRandomQuiz() {
+        return quizService.getRandomQuiz();
+    }
+
+    /** 관리자용 문제 관리 페이지 */
+    @GetMapping("/manage")
+    public String showQuizManagePage(Model model) {
+        model.addAttribute("quizzes", quizService.getAllQuizzes());
+        return "quizManage"; // templates/quizManage.html
     }
 }

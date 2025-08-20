@@ -1,23 +1,50 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script>
+        function validatePassword() {
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            const message = document.getElementById("message");
+
+            if (password !== confirm) {
+                message.textContent = "비밀번호가 일치하지 않습니다.";
+                message.style.color = "red";
+                return false;
+            } else {
+                message.textContent = "비밀번호가 일치합니다.";
+                message.style.color = "green";
+                return true;
+            }
+        }
+    </script>
 </head>
 <body>
 <h1>회원가입</h1>
-<form th:action="@{/user/join}" method="post" th:object="${user}">
-    <div>
-        <label>이메일: <input type="email" th:field="*{email}" required></label>
-    </div>
-    <div>
-        <label>비밀번호: <input type="password" th:field="*{password}" required></label>
-    </div>
-    <div>
-        <label>닉네임: <input type="text" th:field="*{nickname}" required></label>
-    </div>
+<form action="/users/register" method="post">
+    <label>아이디: <input type="text" name="username" required></label><br>
+    <label>비밀번호: <input type="password" name="password" id="password" required></label><br>
+    <label>비밀번호 확인: <input type="password" id="confirmPassword" required></label><br>
+    <label>이메일: <input type="email" name="email" required></label><br>
+    <label>관리자 계정: <input type="checkbox" name="admin"></label><br>
     <button type="submit">가입</button>
 </form>
-<a th:href="@{/main}">메인으로</a>
+
+<script>
+    const form = document.querySelector("form");
+    form.addEventListener("submit", (e) => {
+        const pw = document.getElementById("password").value;
+        const confirmPw = document.getElementById("confirmPassword").value;
+        if(pw !== confirmPw) {
+            e.preventDefault();
+            alert("비밀번호가 일치하지 않습니다.");
+        }
+    });
+</script>
+<p><a href="/users/login">로그인 페이지로 이동</a></p>
 </body>
 </html>

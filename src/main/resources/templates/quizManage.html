@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>퀴즈 관리</title>
+  <script>
+    async function loadQuizzes() {
+        const res = await fetch('/quizzes');
+        const quizzes = await res.json();
+        const tbody = document.getElementById('quizTableBody');
+        tbody.innerHTML = '';
+        quizzes.forEach(q => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${q.id}</td>
+                <td><input type="text" value="${q.question}" id="question-${q.id}"></td>
+                <td><input type="text" value="${q.answer}" id="answer-${q.id}"></td>
+                <td>
+                    <button onclick="updateQuiz(${q.id})">수정</button>
+                    <button onclick="deleteQuiz(${q.id})">삭제</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    async function addQuiz() {
+        const question = document.getElementById('newQuestion').value;
+        const answer = document.getElementById('newAnswer').value;
+        await fetch('/quizzes', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `question=${encodeURIComponent(question)}&answer=${encodeURIComponent(answer)}`
+        });
+        loadQuizzes();
+    }
+
+    async function updateQuiz(id) {
+        const question = document.getElementById(`question-${id}`).value;
+        const answer = document.getElementById(`answer-${id}`).value;
+        await fetch(`/quizzes/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `question=${encodeURIComponent(question)}&answer=${encodeURIComponent(answer)}`
+        });
+        loadQuizzes();
+    }
+
+    async function deleteQuiz(id) {
+        await fetch(`/quizzes/${id}`, { method: 'DELETE' });
+        loadQuizzes();
+    }
+
+    window.onload = loadQuizzes;
+  </script>
+</head>
+<body>
+<h1>퀴즈 관리 페이지 (관리자용)</h1>
+<div>
+  <input type="text" id="newQuestion" placeholder="문제 입력">
+  <input type="text" id="newAnswer" placeholder="정답 입력">
+  <button onclick="addQuiz()">문제 추가</button>
+</div>
+<table border="1">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>문제</th>
+    <th>정답</th>
+    <th>관리</th>
+  </tr>
+  </thead>
+  <tbody id="quizTableBody"></tbody>
+</table>
+</body>
+</html>

@@ -1,34 +1,51 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>회원 목록</title>
+  <title>회원 관리</title>
+  <script>
+    async function loadUsers() {
+        const res = await fetch('/users/all');
+        const users = await res.json();
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = '';
+        users.forEach(u => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${u.id}</td>
+                <td>${u.username}</td>
+                <td>${u.email}</td>
+                <td>${u.admin}</td>
+                <td>${u.status}</td>
+                <td>
+                    ${u.status === 'PENDING' ? `<button onclick="approveUser(${u.id})">승인</button>` : ''}
+                </td>
+            </tr>`;
+        });
+    }
+
+    async function approveUser(id) {
+        await fetch(`/users/approve/${id}`, { method: 'PUT' });
+        loadUsers();
+    }
+
+    window.onload = loadUsers;
+  </script>
 </head>
 <body>
-<h1>회원 목록</h1>
+<h1>회원 관리 페이지 (관리자용)</h1>
 <table border="1">
   <thead>
   <tr>
     <th>ID</th>
+    <th>사용자 이름</th>
     <th>이메일</th>
-    <th>닉네임</th>
-    <th>삭제</th>
+    <th>관리자 여부</th>
+    <th>상태</th>
+    <th>승인</th>
   </tr>
   </thead>
-  <tbody>
-  <tr th:each="u : ${users}">
-    <td th:text="${u.id}">1</td>
-    <td th:text="${u.email}">email</td>
-    <td th:text="${u.nickname}">nick</td>
-    <td>
-      <form th:action="@{/user/delete}" method="post">
-        <input type="hidden" name="id" th:value="${u.id}">
-        <button type="submit">삭제</button>
-      </form>
-    </td>
-  </tr>
-  </tbody>
+  <tbody id="userTableBody"></tbody>
 </table>
-<a th:href="@{/main}">메인으로</a>
 </body>
 </html>
