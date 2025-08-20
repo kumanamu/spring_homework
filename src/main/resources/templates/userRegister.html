@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입</title>
-    <link rel="stylesheet" href="/css/main.css">
     <script>
         function validatePassword() {
             const password = document.getElementById("password").value;
@@ -30,6 +29,8 @@
     <label>비밀번호: <input type="password" name="password" id="password" required></label><br>
     <label>비밀번호 확인: <input type="password" id="confirmPassword" required></label><br>
     <label>이메일: <input type="email" name="email" required></label><br>
+    <label >닉네임: <input type="text" name="nickname" placeholder="닉네임 (선택)">
+    </label><br>
     <label>관리자 계정: <input type="checkbox" name="admin"></label><br>
     <button type="submit">가입</button>
 </form>

@@ -16,44 +16,41 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    /** 회원가입 (DTO 기반) */
+    // 회원가입
     public UserEntity register(UserDto dto) {
-        UserEntity user = new UserEntity();
-        user.setUsername(dto.getUsername());
-        user.setPassword(dto.getPassword());
-        user.setEmail(dto.getEmail());
-        user.setAdmin(dto.isAdmin());
-        user.setStatus("PENDING");
-        user.setAnswerTrue(0);
-        user.setAnswerFalse(0);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        // nickname이 없으면 username으로 기본값 설정
+        String nickname = dto.getNickname() != null && !dto.getNickname().isEmpty()
+                ? dto.getNickname()
+                : dto.getUsername();
+
+        UserEntity user = UserEntity.builder()
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .email(dto.getEmail())
+                .nickname(nickname)
+                .admin(dto.isAdmin())
+                .status("PENDING") // 기본 상태
+                .answerTrue(0)
+                .answerFalse(0)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
         return userRepository.save(user);
     }
 
-    /** 로그인 */
+    // 로그인
     public Optional<UserEntity> login(String username, String password) {
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isPresent() && user.get().getPassword().equals(password) && "APPROVED".equals(user.get().getStatus())) {
-            return user;
-        }
-        return Optional.empty();
+        return userRepository.findByUsernameAndPassword(username, password)
+                .stream().findFirst();
     }
 
-    /** 비밀번호 수정 */
-    public boolean updatePassword(Long userId, String newPassword) {
-        Optional<UserEntity> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-            user.setPassword(newPassword);
-            user.setUpdatedAt(LocalDateTime.now());
-            userRepository.save(user);
-            return true;
-        }
-        return false;
+    // 모든 회원 조회 (관리자용)
+    public List<UserEntity> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    /** 회원 승인 */
+    // 회원 승인 (관리자용)
     public boolean approveUser(Long userId) {
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -65,8 +62,31 @@ public class UserService {
         }
         return false;
     }
+    // 회원 정보 수정 (관리자용)
+    public UserEntity updateUser(UserEntity updatedUser) {
+        Optional<UserEntity> userOpt = userRepository.findById(updatedUser.getId());
+        if (userOpt.isPresent()) {
+            UserEntity user = userOpt.get();
+            user.setUsername(updatedUser.getUsername());
+            user.setEmail(updatedUser.getEmail());
+            user.setNickname(updatedUser.getNickname());
+            user.setAdmin(updatedUser.isAdmin());
+            user.setStatus(updatedUser.getStatus());
+            user.setUpdatedAt(LocalDateTime.now());
+            return userRepository.save(user);
+        }
+        return null;
+    }
 
-    /** 모든 회원 조회 (관리자용) */
+    // 회원 삭제 (관리자용)
+    public boolean deleteUser(Long userId) {
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+            return true;
+        }
+        return false;
+    }
+    // 관리자용 전체 회원 조회
     public List<UserEntity> findAll() {
         return userRepository.findAll();
     }

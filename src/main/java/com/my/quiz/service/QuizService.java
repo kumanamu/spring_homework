@@ -51,6 +51,8 @@ public class QuizService {
         return quizRepository.findAll();
     }
 
+
+
     /** 랜덤 문제 추출 */
     public QuizEntity getRandomQuiz() {
         List<QuizEntity> quizzes = quizRepository.findAll();

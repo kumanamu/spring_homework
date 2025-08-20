@@ -2,7 +2,9 @@ package com.my.quiz.controller;
 
 import com.my.quiz.dto.QuizDto;
 import com.my.quiz.entity.QuizEntity;
+import com.my.quiz.entity.UserEntity;
 import com.my.quiz.service.QuizService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,5 +52,14 @@ public class QuizController {
     public String showQuizManagePage(Model model) {
         model.addAttribute("quizzes", quizService.getAllQuizzes());
         return "quizManage"; // templates/quizManage.html
+    }
+    @GetMapping("/quizzes/manage")
+    public String showQuizManagePage(HttpSession session, Model model) {
+        UserEntity user = (UserEntity) session.getAttribute("loginUser");
+        if (user == null || !user.isAdmin()) {
+            return "redirect:/"; // 관리자 아니면 메인으로 리다이렉트
+        }
+        model.addAttribute("quizzes", quizService.getAllQuizzes());
+        return "quizManage";
     }
 }
