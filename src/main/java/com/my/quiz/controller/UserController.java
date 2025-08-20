@@ -1,9 +1,9 @@
 package com.my.quiz.controller;
 
-import com.my.quiz.dto.UserDto;
-import com.my.quiz.entity.UserEntity;
+
 import com.my.quiz.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -21,69 +20,94 @@ public class UserController {
     }
 
     // 회원가입 페이지
-    @GetMapping("/signup")
-    public String signupForm() {
-        return "user/signup";
+    @GetMapping("/register")
+    public String registerForm() {
+        return "register";
     }
 
     // 회원가입 처리
-    @PostMapping("/signup")
-    public String signup(@ModelAttribute UserDto userDto, Model model) {
-        boolean success = userService.register(userDto);
-        if (!success) {
-            model.addAttribute("error", "관리자는 한 명만 등록 가능합니다.");
-            return "user/signup";
+    @PostMapping("/register")
+    public String register(@RequestParam String username,
+                           @RequestParam String password,
+                           Model model) {
+        try {
+            userService.register(username, password);
+            model.addAttribute("msg", "회원가입 완료");
+        } catch (RuntimeException e) {
+            model.addAttribute("msg", e.getMessage());
+            return "register";
         }
-        return "redirect:/user/login";
+        return "login";
     }
 
     // 로그인 페이지
     @GetMapping("/login")
     public String loginForm() {
-        return "user/login";
+        return "login";
     }
 
     // 로그인 처리
     @PostMapping("/login")
-    public String login(@ModelAttribute UserDto userDto,
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
                         HttpSession session,
                         Model model) {
-        UserDto loginUser = userService.login(userDto);
-        if (loginUser == null) {
-            model.addAttribute("error", "로그인 실패. 승인 여부 또는 비밀번호를 확인하세요.");
-            return "user/login";
+        User user = userService.login(username, password);
+        if(user == null) {
+            model.addAttribute("msg", "아이디 또는 비밀번호가 맞지 않거나 승인되지 않은 사용자입니다.");
+            return "login";
         }
-        session.setAttribute("loginUser", loginUser);
-        return "redirect:/";
+
+        session.setAttribute("loginUser", user);
+        if(user.isAdmin()) {
+            return "redirect:/admin";
+        } else {
+            return "redirect:/quiz";
+        }
     }
 
     // 로그아웃
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/";
+        return "redirect:/login";
     }
 
-    // 관리자만 회원 승인/관리
-    @GetMapping("/manage")
-    public String manageUsers(HttpSession session, Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
+    // 관리자 페이지: 승인되지 않은 사용자 목록
+    @GetMapping("/admin")
+    public String adminPage(HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/login";
         }
-        model.addAttribute("users", userService.findAll());
-        return "user/manage";
+
+        // 승인되지 않은 회원 목록 조회
+        List<User> pendingUsers = userService.getPendingUsers();
+        model.addAttribute("pendingUsers", pendingUsers);
+        return "admin";
     }
 
-    @PostMapping("/approve/{id}")
-    public String approveUser(@PathVariable Long id) {
-        userService.approveUser(id);
-        return "redirect:/user/manage";
+    // 관리자: 사용자 승인
+    @PostMapping("/admin/approve")
+    public String approveUser(@RequestParam Long userId, HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/login";
+        }
+        userService.approveUser(userId);
+        return "redirect:/admin";
     }
 
-    @PostMapping("/updatePw/{id}")
-    public String updatePassword(@PathVariable Long id, @RequestParam String newPassword) {
-        userService.updatePassword(id, newPassword);
-        return "redirect:/user/manage";
+    // 관리자: 비밀번호 변경
+    @PostMapping("/admin/changePassword")
+    public String changePassword(@RequestParam Long userId,
+                                 @RequestParam String newPassword,
+                                 HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/login";
+        }
+        userService.changePassword(userId, newPassword);
+        return "redirect:/admin";
     }
 }

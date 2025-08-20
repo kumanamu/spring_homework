@@ -1,41 +1,32 @@
 package com.my.quiz.controller;
 
-import com.my.quiz.dto.QuizResultDto;
-import com.my.quiz.entity.QuizResultEntity;
 import com.my.quiz.service.QuizResultService;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/result")
+@RequestMapping("/quiz/results")
 public class QuizResultController {
 
     private final QuizResultService quizResultService;
 
-    // 내 결과 보기
-    @GetMapping("/my")
-    public String myResults(HttpSession session, Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isStatus()) {
-            return "redirect:/user/login";
-        }
-        model.addAttribute("results", quizResultService.findByUserId(loginUser.getId()));
-        return "result/my";
+    public QuizResultController(QuizResultService quizResultService) {
+        this.quizResultService = quizResultService;
     }
 
-    // 관리자용 전체 결과 보기
-    @GetMapping("/all")
-    public String allResults(HttpSession session, Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
+    // 현재 로그인한 회원의 퀴즈 결과 보기
+    @GetMapping
+    public String viewResults(HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isStatus()) {
+            return "redirect:/login";
         }
-        model.addAttribute("results", quizResultService.findAll());
-        return "result/all";
+
+        model.addAttribute("results", quizResultService.getResultsByUser(loginUser));
+        return "quiz_results"; // quiz_results.html 템플릿 필요
     }
 }

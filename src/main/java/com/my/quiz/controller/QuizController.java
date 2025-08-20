@@ -1,88 +1,50 @@
 package com.my.quiz.controller;
 
-import com.my.quiz.dto.QuizDto;
-import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.service.QuizService;
+import com.my.quiz.service.QuizResultService;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/quiz")
 public class QuizController {
 
     private final QuizService quizService;
+    private final QuizResultService quizResultService;
 
-    // 관리자 - 문제 등록 폼
-    @GetMapping("/new")
-    public String newQuizForm(HttpSession session) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
-        }
-        return "quiz/new";
+    public QuizController(QuizService quizService, QuizResultService quizResultService) {
+        this.quizService = quizService;
+        this.quizResultService = quizResultService;
     }
 
-    // 문제 등록 처리
-    @PostMapping("/new")
-    public String newQuiz(@ModelAttribute QuizDto quizDto, HttpSession session) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
+    // 퀴즈 페이지
+    @GetMapping
+    public String quizPage(HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isStatus()) {
+            return "redirect:/login";
         }
-        quizService.createQuiz(quizDto);
-        return "redirect:/quiz/list";
+
+        model.addAttribute("quizzes", quizService.getAllQuizzes());
+        return "quiz";
     }
 
-    // 문제 리스트 (관리자용)
-    @GetMapping("/list")
-    public String listQuizzes(HttpSession session, Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
-        }
-        model.addAttribute("quizzes", quizService.findAll());
-        return "quiz/list";
-    }
-
-    // 문제 삭제
-    @PostMapping("/delete/{id}")
-    public String deleteQuiz(@PathVariable Long id, HttpSession session) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isAdmin()) {
-            return "redirect:/";
-        }
-        quizService.deleteQuiz(id);
-        return "redirect:/quiz/list";
-    }
-
-    // 일반 사용자 - 랜덤 문제 풀기
-    @GetMapping("/solve")
-    public String solveQuiz(HttpSession session, Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isStatus()) {
-            return "redirect:/user/login";
-        }
-        QuizDto quiz = quizService.getRandomQuiz();
-        model.addAttribute("quiz", quiz);
-        return "quiz/solve";
-    }
-
-    // 문제 제출
-    @PostMapping("/solve")
-    public String solveQuiz(@RequestParam Long quizId,
-                            @RequestParam String userAnswer,
-                            HttpSession session,
-                            Model model) {
-        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
-        if (loginUser == null || !loginUser.isStatus()) {
-            return "redirect:/user/login";
+    // 퀴즈 제출 처리
+    @PostMapping("/submit")
+    public String submitQuiz(HttpSession session,
+                             @RequestParam int correct,
+                             @RequestParam int wrong,
+                             Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null || !loginUser.isStatus()) {
+            return "redirect:/login";
         }
 
-        boolean correct = quizService.checkAnswer(loginUser, quizId, userAnswer);
-        model.addAttribute("result", correct ? "정답!" : "오답!");
-        return "quiz/result";
+        quizResultService.saveResult(loginUser, correct, wrong);
+        model.addAttribute("msg", "퀴즈 결과가 저장되었습니다.");
+        return "redirect:/quiz/results";
     }
 }
