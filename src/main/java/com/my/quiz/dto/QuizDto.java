@@ -1,16 +1,18 @@
 package com.my.quiz.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import lombok.*;
-
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class QuizDto {
     private Long id;
     private String question;
-    private String answer;   // 정답
-    private String options;  // 보기 (쉼표구분 등)
+    private String answer;
+    private String option1;
+    private String option2;
+    private String option3;
+    private String option4;
 }

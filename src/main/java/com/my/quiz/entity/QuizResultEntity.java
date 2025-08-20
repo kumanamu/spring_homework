@@ -1,39 +1,36 @@
 package com.my.quiz.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.catalina.User;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "quiz_results")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "quiz_result")
 public class QuizResultEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;  // UserEntity 대신 id
+    private Long quizId;  // QuizEntity 대신 id
 
-    private int answerTrue;   // 맞은 수
-    private int answerFalse;  // 틀린 수
+    private boolean correct;
 
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    // Getter & Setter
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    // getter / setter
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public Long getQuizId() { return quizId; }
+    public void setQuizId(Long quizId) { this.quizId = quizId; }
+
+    public boolean isCorrect() { return correct; }
+    public void setCorrect(boolean correct) { this.correct = correct; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -1,50 +1,34 @@
 package com.my.quiz.controller;
 
+import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.service.QuizService;
-import com.my.quiz.service.QuizResultService;
-import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.User;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/quiz")
+import java.util.List;
+
+@RestController
+@RequestMapping("/quizzes")
 public class QuizController {
 
-    private final QuizService quizService;
-    private final QuizResultService quizResultService;
+    @Autowired
+    private QuizService quizService;
 
-    public QuizController(QuizService quizService, QuizResultService quizResultService) {
-        this.quizService = quizService;
-        this.quizResultService = quizResultService;
-    }
-
-    // 퀴즈 페이지
+    // 모든 문제 조회
     @GetMapping
-    public String quizPage(HttpSession session, Model model) {
-        User loginUser = (User) session.getAttribute("loginUser");
-        if(loginUser == null || !loginUser.isStatus()) {
-            return "redirect:/login";
-        }
-
-        model.addAttribute("quizzes", quizService.getAllQuizzes());
-        return "quiz";
+    public List<QuizEntity> getAll() {
+        return quizService.getAll();
     }
 
-    // 퀴즈 제출 처리
-    @PostMapping("/submit")
-    public String submitQuiz(HttpSession session,
-                             @RequestParam int correct,
-                             @RequestParam int wrong,
-                             Model model) {
-        User loginUser = (User) session.getAttribute("loginUser");
-        if(loginUser == null || !loginUser.isStatus()) {
-            return "redirect:/login";
-        }
+    // 문제 추가
+    @PostMapping
+    public QuizEntity addQuiz(@RequestParam String question, @RequestParam String answer) {
+        return quizService.addQuiz(question, answer);
+    }
 
-        quizResultService.saveResult(loginUser, correct, wrong);
-        model.addAttribute("msg", "퀴즈 결과가 저장되었습니다.");
-        return "redirect:/quiz/results";
+    // 랜덤 문제 n개 가져오기
+    @GetMapping("/random")
+    public List<QuizEntity> getRandom(@RequestParam(defaultValue = "5") int count) {
+        return quizService.getRandom(count);
     }
 }

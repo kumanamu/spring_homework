@@ -1,22 +1,16 @@
 package com.my.quiz.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class QuizResultDto {
     private Long id;
-    private Long quizId;
-    private String quizQuestion;
-    private String userAnswer;
-    private String correctAnswer;
-    private int score;
     private Long userId;
-    private boolean correct;
-    private LocalDateTime createdAt;
+    private int score;   // 점수
+    private int correctCount;
+    private int wrongCount;
 }
