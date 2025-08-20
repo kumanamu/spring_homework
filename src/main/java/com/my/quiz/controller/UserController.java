@@ -13,44 +13,73 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
+
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     // 회원가입 페이지
-    @GetMapping("/join")
-    public String showRegisterForm() {
-        return "userRegister"; // templates/userRegister.html
+    @GetMapping("/signup")
+    public String signupForm() {
+        return "user/signup";
     }
 
     // 회원가입 처리
-    @PostMapping("/join")
-    public String registerUser(@ModelAttribute UserDto userDto) {
-        // DTO → Entity 변환
-        UserEntity userEntity = UserEntity.builder()
-                .email(userDto.getEmail())
-                .password(userDto.getPassword())
-                .nickname(userDto.getNickname())
-                .build();
-
-        userService.joinUser(userEntity);
-        return "redirect:/user/list";
+    @PostMapping("/signup")
+    public String signup(@ModelAttribute UserDto userDto, Model model) {
+        boolean success = userService.register(userDto);
+        if (!success) {
+            model.addAttribute("error", "관리자는 한 명만 등록 가능합니다.");
+            return "user/signup";
+        }
+        return "redirect:/user/login";
     }
 
-    // 회원 리스트
-    @GetMapping("/list")
-    public String listUsers(Model model) {
-        List<UserEntity> users = userService.getAllUsers();
-        model.addAttribute("users", users);
-        return "userList"; // templates/userList.html
+    // 로그인 페이지
+    @GetMapping("/login")
+    public String loginForm() {
+        return "user/login";
     }
 
-    // 회원 삭제
-    @PostMapping("/delete")
-    public String deleteUser(@RequestParam Long id) {
-        userService.deleteUser(id);
-        return "redirect:/user/list";
+    // 로그인 처리
+    @PostMapping("/login")
+    public String login(@ModelAttribute UserDto userDto,
+                        HttpSession session,
+                        Model model) {
+        UserDto loginUser = userService.login(userDto);
+        if (loginUser == null) {
+            model.addAttribute("error", "로그인 실패. 승인 여부 또는 비밀번호를 확인하세요.");
+            return "user/login";
+        }
+        session.setAttribute("loginUser", loginUser);
+        return "redirect:/";
+    }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
+    }
+
+    // 관리자만 회원 승인/관리
+    @GetMapping("/manage")
+    public String manageUsers(HttpSession session, Model model) {
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
+        if (loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/";
+        }
+        model.addAttribute("users", userService.findAll());
+        return "user/manage";
+    }
+
+    @PostMapping("/approve/{id}")
+    public String approveUser(@PathVariable Long id) {
+        userService.approveUser(id);
+        return "redirect:/user/manage";
+    }
+
+    @PostMapping("/updatePw/{id}")
+    public String updatePassword(@PathVariable Long id, @RequestParam String newPassword) {
+        userService.updatePassword(id, newPassword);
+        return "redirect:/user/manage";
     }
 }

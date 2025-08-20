@@ -7,38 +7,35 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/result")
 public class QuizResultController {
 
-    private final QuizResultService resultService;
+    private final QuizResultService quizResultService;
 
-    public QuizResultController(QuizResultService resultService) {
-        this.resultService = resultService;
+    // 내 결과 보기
+    @GetMapping("/my")
+    public String myResults(HttpSession session, Model model) {
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
+        if (loginUser == null || !loginUser.isStatus()) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("results", quizResultService.findByUserId(loginUser.getId()));
+        return "result/my";
     }
 
-    // 결과 리스트 (전체)
-    @GetMapping("/list")
-    public String listResults(Model model) {
-        List<QuizResultEntity> results = resultService.getAllResults();
-        model.addAttribute("results", results);
-        return "resultList"; // resultList.html
-    }
-
-    // 특정 회원 결과 조회
-    @GetMapping("/user/{userId}")
-    public String userResults(@PathVariable Long userId, Model model) {
-        List<QuizResultEntity> results = resultService.getResultsByUser(userId);
-        model.addAttribute("results", results);
-        return "userResultList"; // userResultList.html
-    }
-
-    // 결과 저장
-    @PostMapping("/save")
-    public String saveResult(@ModelAttribute QuizResultEntity result) {
-        resultService.saveResult(result);
-        return "redirect:/result/list";
+    // 관리자용 전체 결과 보기
+    @GetMapping("/all")
+    public String allResults(HttpSession session, Model model) {
+        UserDto loginUser = (UserDto) session.getAttribute("loginUser");
+        if (loginUser == null || !loginUser.isAdmin()) {
+            return "redirect:/";
+        }
+        model.addAttribute("results", quizResultService.findAll());
+        return "result/all";
     }
 }

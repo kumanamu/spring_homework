@@ -11,6 +11,6 @@ import lombok.*;
 public class QuizDto {
     private Long id;
     private String question;
-    private String answer;  // 정답은 관리자/저장용
-    private String options; // 보기 (OX라면 "O,X")
+    private String answer;   // 정답
+    private String options;  // 보기 (쉼표구분 등)
 }

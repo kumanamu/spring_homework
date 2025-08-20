@@ -8,15 +8,31 @@
 <body>
 <h1>퀴즈 문제</h1>
 
-<form th:action="@{/result/save}" method="post">
-    <div th:each="quiz, iterStat : ${quizzes}">
+<form th:action="@{/result/save}" method="post" id="quizForm">
+    <input type="hidden" name="userId" th:value="${userId}">
+    <div th:each="quiz : ${quizzes}">
         <p th:text="${quiz.question}">문제 내용</p>
-        <input type="hidden" th:name="quizIds" th:value="${quiz.id}">
-        <input type="hidden" th:name="userId" th:value="${user.id}">
-        <label>답: <input type="text" th:name="answers"></label>
+        <label>답: <input type="text" class="answer-input"></label>
+        <input type="hidden" class="quiz-id" th:value="${quiz.id}">
+        <hr>
     </div>
+
+    <!-- 제출 전 JS로 CSV로 묶어서 hidden에 담아 전송 -->
+    <input type="hidden" name="quizIds" id="quizIdsCsv">
+    <input type="hidden" name="answers" id="answersCsv">
+
     <button type="submit">제출</button>
 </form>
+
+<script>
+    const form = document.getElementById('quizForm');
+    form.addEventListener('submit', function(){
+      const ids = Array.from(document.querySelectorAll('.quiz-id')).map(i=>i.value);
+      const answers = Array.from(document.querySelectorAll('.answer-input')).map(i=>i.value ?? '');
+      document.getElementById('quizIdsCsv').value = ids.join(',');
+      document.getElementById('answersCsv').value = answers.join(',');
+    });
+</script>
 
 <a th:href="@{/main}">메인으로</a>
 </body>

@@ -8,24 +8,31 @@
 <body>
 <h1>퀴즈 결과</h1>
 
-<table>
+<table border="1">
     <thead>
     <tr>
         <th>문제</th>
-        <th>답</th>
+        <th>내 답</th>
+        <th>정답</th>
         <th>점수</th>
+        <th>정오표시</th>
+        <th>시간</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="result : ${results}">
-        <td th:text="${result.quiz.question}">문제 내용</td>
+        <td th:text="${result.quizQuestion}">문제 내용</td>
         <td th:text="${result.userAnswer}">사용자 답</td>
-        <td th:text="${result.correct ? '1' : '0'}">점수</td>
+        <td th:text="${result.correctAnswer}">정답</td>
+        <td th:text="${result.score}">0</td>
+        <td th:text="${result.correct} ? 'O' : 'X'">O</td>
+        <td th:text="${#temporals.format(result.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
     </tr>
     </tbody>
 </table>
 
 <p>총 점수: <span th:text="${totalScore}">0</span></p>
+
 
 <a th:href="@{/main}">메인으로</a>
 </body>
