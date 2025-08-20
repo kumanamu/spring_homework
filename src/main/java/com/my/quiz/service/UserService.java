@@ -29,7 +29,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .nickname(nickname)
                 .admin(dto.isAdmin())
-                .status("PENDING") // 기본 상태
+                .status("APPROVED") // 기본 상태
                 .answerTrue(0)
                 .answerFalse(0)
                 .createdAt(LocalDateTime.now())
@@ -41,8 +41,10 @@ public class UserService {
 
     // 로그인
     public Optional<UserEntity> login(String username, String password) {
+
         return userRepository.findByUsernameAndPassword(username, password)
                 .stream().findFirst();
+
     }
 
     // 모든 회원 조회 (관리자용)
