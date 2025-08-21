@@ -1,35 +1,33 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
     <title>퀴즈 풀기</title>
-    <script>
-        // 정답 제출
-        function submitAnswer(quizId) {
-            const userAnswer = document.getElementById('answer-' + quizId).value;
-            fetch('/results', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `userId=${document.getElementById('userId').value}&quizId=${quizId}&userAnswer=${userAnswer}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.correct ? "정답!" : "오답!");
-                location.reload();
-            })
-            .catch(error => console.error(error));
-        }
-    </script>
+    <style>
+        body { font-family: sans-serif; max-width: 720px; margin: 24px auto; }
+        form { display: grid; gap: 12px; }
+        input { padding: 8px; }
+        .empty { color: #666; }
+        nav a { margin-right: 10px; }
+    </style>
 </head>
 <body>
-<h1>랜덤 퀴즈 풀기</h1>
-<input type="hidden" id="userId" th:value="${user.id}" />
-<div th:each="quiz : ${quizzes}">
-    <p><strong th:text="${quiz.question}"></strong></p>
-    <input type="text" th:id="'answer-' + ${quiz.id}" placeholder="답 입력">
-    <button th:onclick="'submitAnswer(' + ${quiz.id} + ')'">제출</button>
-    <hr>
-</div>
+<nav>
+    <a th:href="@{/}">메인</a>
+    <a th:href="@{/results/my}" th:if="${session.loginUser != null and !session.isAdmin}">내 결과</a>
+    <a th:href="@{/quiz/manage}" th:if="${session.isAdmin}">퀴즈 관리</a>
+</nav>
+
+<h2>퀴즈 풀기</h2>
+
+<div th:if="${quiz == null}" class="empty">등록된 문제가 없습니다.</div>
+
+<form th:if="${quiz != null}" th:action="@{/quiz/submit}" method="post">
+    <p><b>[문제]</b> <span th:text="${quiz.question}">문제 내용</span></p>
+    <input type="hidden" name="quizId" th:value="${quiz.id}"/>
+    <input type="text" name="userAnswer" placeholder="정답을 입력하세요" required/>
+    <button type="submit">제출</button>
+</form>
+
 </body>
 </html>

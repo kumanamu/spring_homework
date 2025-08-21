@@ -1,51 +1,36 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입</title>
-    <script>
-        function validatePassword() {
-            const password = document.getElementById("password").value;
-            const confirm = document.getElementById("confirmPassword").value;
-            const message = document.getElementById("message");
-
-            if (password !== confirm) {
-                message.textContent = "비밀번호가 일치하지 않습니다.";
-                message.style.color = "red";
-                return false;
-            } else {
-                message.textContent = "비밀번호가 일치합니다.";
-                message.style.color = "green";
-                return true;
-            }
-        }
-    </script>
+    <meta charset="UTF-8"/>
+    <title>로그인</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 40px auto; }
+        form { display: grid; gap: 12px; }
+        input { padding: 8px; }
+        .error { color: #c00; margin-top: 8px; }
+        a { margin-right: 8px; }
+    </style>
 </head>
 <body>
-<h1>회원가입</h1>
-<form action="/users/register" method="post">
-    <label>아이디: <input type="text" name="username" required></label><br>
-    <label>비밀번호: <input type="password" name="password" id="password" required></label><br>
-    <label>비밀번호 확인: <input type="password" id="confirmPassword" required></label><br>
-    <label>이메일: <input type="email" name="email" required></label><br>
-    <label >닉네임: <input type="text" name="nickname" placeholder="닉네임 (선택)">
-    </label><br>
-    <label>관리자 계정: <input type="checkbox" name="admin"></label><br>
-    <button type="submit">가입</button>
+<h2>로그인</h2>
+
+<form th:action="@{/users/login}" method="post">
+    <label>
+        아이디
+        <input type="text" name="username" required/>
+    </label>
+    <label>
+        비밀번호
+        <input type="password" name="password" required/>
+    </label>
+    <button type="submit">로그인</button>
 </form>
 
-<script>
-    const form = document.querySelector("form");
-    form.addEventListener("submit", (e) => {
-        const pw = document.getElementById("password").value;
-        const confirmPw = document.getElementById("confirmPassword").value;
-        if(pw !== confirmPw) {
-            e.preventDefault();
-            alert("비밀번호가 일치하지 않습니다.");
-        }
-    });
-</script>
-<p><a href="/users/login">로그인 페이지로 이동</a></p>
+<p class="error" th:if="${error != null}" th:text="${error}"></p>
+
+<p>
+    <a th:href="@{/}">메인으로</a>
+    <a th:href="@{/users/register}">회원가입</a>
+</p>
 </body>
 </html>

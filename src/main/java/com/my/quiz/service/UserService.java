@@ -3,93 +3,50 @@ package com.my.quiz.service;
 import com.my.quiz.dto.UserDto;
 import com.my.quiz.entity.UserEntity;
 import com.my.quiz.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    // 회원가입
-    public UserEntity register(UserDto dto) {
-        // nickname이 없으면 username으로 기본값 설정
-        String nickname = dto.getNickname() != null && !dto.getNickname().isEmpty()
-                ? dto.getNickname()
-                : dto.getUsername();
-
-        UserEntity user = UserEntity.builder()
-                .username(dto.getUsername())
-                .password(dto.getPassword())
-                .email(dto.getEmail())
-                .nickname(nickname)
-                .admin(dto.isAdmin())
-                .status("APPROVED") // 기본 상태
-                .answerTrue(0)
-                .answerFalse(0)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        return userRepository.save(user);
+    /** 회원가입 */
+    public void register(UserDto dto) {
+        UserEntity e = new UserEntity();
+        e.setUsername(dto.getUsername());
+        e.setPassword(dto.getPassword()); // 나중에 BCrypt 권장
+        e.setCreatedAt(LocalDateTime.now());
+        userRepository.save(e);
     }
 
-    // 로그인
-    public Optional<UserEntity> login(String username, String password) {
-
-        return userRepository.findByUsernameAndPassword(username, password)
-                .stream().findFirst();
-
+    /** 로그인: 성공 시 DTO, 실패 시 null */
+    public UserDto login(String username, String password) {
+        Optional<UserEntity> opt = userRepository.findByUsernameAndPassword(username, password);
+        return opt.map(this::toDto).orElse(null);
     }
 
-    // 모든 회원 조회 (관리자용)
-    public List<UserEntity> getAllUsers() {
-        return userRepository.findAll();
+    /** 관리자용 회원 목록: DTO 목록 반환 */
+    public List<UserDto> findAll() {
+        return userRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
-    // 회원 승인 (관리자용)
-    public boolean approveUser(Long userId) {
-        Optional<UserEntity> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-            user.setStatus("APPROVED");
-            user.setUpdatedAt(LocalDateTime.now());
-            userRepository.save(user);
-            return true;
-        }
-        return false;
-    }
-    // 회원 정보 수정 (관리자용)
-    public UserEntity updateUser(UserEntity updatedUser) {
-        Optional<UserEntity> userOpt = userRepository.findById(updatedUser.getId());
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-            user.setUsername(updatedUser.getUsername());
-            user.setEmail(updatedUser.getEmail());
-            user.setNickname(updatedUser.getNickname());
-            user.setAdmin(updatedUser.isAdmin());
-            user.setStatus(updatedUser.getStatus());
-            user.setUpdatedAt(LocalDateTime.now());
-            return userRepository.save(user);
-        }
-        return null;
-    }
-
-    // 회원 삭제 (관리자용)
-    public boolean deleteUser(Long userId) {
-        if (userRepository.existsById(userId)) {
-            userRepository.deleteById(userId);
-            return true;
-        }
-        return false;
-    }
-    // 관리자용 전체 회원 조회
-    public List<UserEntity> findAll() {
-        return userRepository.findAll();
+    // ===== 내부 변환 유틸 =====
+    private UserDto toDto(UserEntity e) {
+        if (e == null) return null;
+        UserDto dto = new UserDto();
+        dto.setId(e.getId());
+        dto.setUsername(e.getUsername());
+        dto.setPassword(null); // 보안상 비번은 노출 X
+        dto.setCreatedAt(e.getCreatedAt());
+        return dto;
     }
 }

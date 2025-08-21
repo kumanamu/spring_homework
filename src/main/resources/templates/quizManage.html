@@ -1,66 +1,40 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"/>
   <title>퀴즈 관리</title>
-  <script>
-    async function loadQuizzes() {
-        const res = await fetch('/quizzes');
-        const quizzes = await res.json();
-        const tbody = document.getElementById('quizTableBody');
-        tbody.innerHTML = '';
-        quizzes.forEach(q => {
-            tbody.innerHTML += `
-            <tr>
-                <td>${q.id}</td>
-                <td><input type="text" value="${q.question}" id="question-${q.id}"></td>
-                <td><input type="text" value="${q.answer}" id="answer-${q.id}"></td>
-                <td>
-                    <button onclick="updateQuiz(${q.id})">수정</button>
-                    <button onclick="deleteQuiz(${q.id})">삭제</button>
-                </td>
-            </tr>`;
-        });
-    }
-
-    async function addQuiz() {
-        const question = document.getElementById('newQuestion').value;
-        const answer = document.getElementById('newAnswer').value;
-        await fetch('/quizzes', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `question=${encodeURIComponent(question)}&answer=${encodeURIComponent(answer)}`
-        });
-        loadQuizzes();
-    }
-
-    async function updateQuiz(id) {
-        const question = document.getElementById(`question-${id}`).value;
-        const answer = document.getElementById(`answer-${id}`).value;
-        await fetch(`/quizzes/${id}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `question=${encodeURIComponent(question)}&answer=${encodeURIComponent(answer)}`
-        });
-        loadQuizzes();
-    }
-
-    async function deleteQuiz(id) {
-        await fetch(`/quizzes/${id}`, { method: 'DELETE' });
-        loadQuizzes();
-    }
-
-    window.onload = loadQuizzes;
-  </script>
+  <style>
+    body { font-family: sans-serif; max-width: 1000px; margin: 24px auto; }
+    form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 16px; }
+    input { padding: 8px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+    th { background: #f3f3f3; }
+    .actions form { display: inline-block; }
+    nav a { margin-right: 10px; }
+    .edit-area { margin-top: 24px; padding: 12px; background: #fafafa; border: 1px solid #eee; }
+  </style>
 </head>
 <body>
-<h1>퀴즈 관리 페이지 (관리자용)</h1>
-<div>
-  <input type="text" id="newQuestion" placeholder="문제 입력">
-  <input type="text" id="newAnswer" placeholder="정답 입력">
-  <button onclick="addQuiz()">문제 추가</button>
-</div>
-<table border="1">
+<nav>
+  <a th:href="@{/}">메인</a>
+  <a th:href="@{/results/all}">결과 전체보기</a>
+  <a th:href="@{/users/list}">회원 목록</a>
+</nav>
+
+<h2>퀴즈 관리</h2>
+
+<!-- 새 퀴즈 등록 -->
+<h3>새 퀴즈 등록</h3>
+<form th:action="@{/quiz/create}" method="post" th:object="${newQuiz}">
+  <input type="text" th:field="*{question}" placeholder="문제" required/>
+  <input type="text" th:field="*{answer}" placeholder="정답" required/>
+  <button type="submit">등록</button>
+</form>
+
+<!-- 목록 -->
+<h3>퀴즈 목록</h3>
+<table>
   <thead>
   <tr>
     <th>ID</th>
@@ -69,7 +43,30 @@
     <th>관리</th>
   </tr>
   </thead>
-  <tbody id="quizTableBody"></tbody>
+  <tbody>
+  <tr th:each="q : ${quizzes}">
+    <td th:text="${q.id}">1</td>
+    <td th:text="${q.question}">문제</td>
+    <td th:text="${q.answer}">정답</td>
+    <td class="actions">
+      <a th:href="@{/quiz/edit/{id}(id=${q.id})}">수정</a>
+      <form th:action="@{/quiz/delete/{id}(id=${q.id})}" method="post" style="margin-left:8px;">
+        <button type="submit" onclick="return confirm('삭제할까요?')">삭제</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
 </table>
+
+<!-- 수정 영역(같은 페이지에서 표시) -->
+<div class="edit-area" th:if="${quiz != null}">
+  <h3>퀴즈 수정</h3>
+  <form th:action="@{/quiz/edit/{id}(id=${quiz.id})}" method="post" th:object="${quiz}">
+    <input type="text" th:field="*{question}" placeholder="문제" required/>
+    <input type="text" th:field="*{answer}" placeholder="정답" required/>
+    <button type="submit">수정 완료</button>
+  </form>
+</div>
+
 </body>
 </html>
