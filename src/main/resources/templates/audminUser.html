@@ -2,21 +2,30 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <meta charset="UTF-8"/>
-  <title>회원 목록</title>
+  <title>회원 승인 관리</title>
   <style>
-    body { font-family: sans-serif; max-width: 900px; margin: 24px auto; }
-    table { border-collapse: collapse; width: 100%; }
+    body { font-family: sans-serif; max-width: 960px; margin: 24px auto; }
+    nav a { margin-right: 12px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #f4f4f4; }
     .pill { padding: 2px 8px; border-radius: 12px; font-size: 12px; }
     .ok { background:#e6ffed; color:#057a55; }
     .no { background:#fff5f5; color:#c53030; }
-    form { display:inline; margin:0; }
-    .actions button { margin-right: 6px; }
+    form { display:inline; }
   </style>
 </head>
 <body>
-<h2>회원 목록</h2>
+
+<h2>회원 승인 관리</h2>
+<nav>
+  <a th:href="@{/admin}">관리자 대시보드</a>
+  <a th:href="@{/admin/users(view='pending')}">대기 목록</a>
+  <a th:href="@{/admin/users(view='all')}">전체 목록</a>
+</nav>
+
+<p th:if="${view == 'pending'}">현재: <b>승인 대기</b> 목록</p>
+<p th:if="${view == 'all'}">현재: <b>전체</b> 목록</p>
 
 <table>
   <thead>
@@ -40,25 +49,20 @@
     </td>
     <td th:text="${u.admin}">false</td>
     <td><span th:text="${u.answerTrue}">0</span> / <span th:text="${u.answerFalse}">0</span></td>
-    <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd HH:mm')}">2025-08-21</td>
-    <td class="actions">
+    <td th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd HH:mm')}">2025-08-21 12:00</td>
+    <td>
       <!-- 승인 대기 → 승인 -->
       <form th:if="${!u.status}" th:action="@{/admin/users/{id}/approve(id=${u.id})}" method="post">
-        <input type="hidden" name="redirect" th:value="@{/users/list}"/>
         <button type="submit">승인</button>
       </form>
-      <!-- 승인됨 → 거절(비활성화) -->
-      <form th:if="${u.status}" th:action="@{/admin/users/{id}/reject(id=${u.id})}" method="post">
-        <input type="hidden" name="redirect" th:value="@{/users/list}"/>
-        <button type="submit">거절</button>
+      <!-- 이미 승인 → 회수 -->
+      <form th:if="${u.status}" th:action="@{/admin/users/{id}/revoke(id=${u.id})}" method="post">
+        <button type="submit">승인 회수</button>
       </form>
     </td>
   </tr>
   </tbody>
 </table>
 
-<p style="margin-top:12px;">
-  <a th:href="@{/admin}">관리자 대시보드</a>
-</p>
 </body>
 </html>

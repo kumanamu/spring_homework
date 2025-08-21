@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8"/>
@@ -13,7 +13,6 @@
 <body>
 
 <header>
-    <!-- 관리자 배지 -->
     <div>
         <span class="badge" th:if="${session.isAdmin}">✅ 관리자페이지입니다</span>
         <span th:if="${session.loginUser != null and !session.isAdmin}">
@@ -21,7 +20,6 @@
     </span>
     </div>
 
-    <!-- 관리자 전용 메뉴 -->
     <nav th:if="${session.isAdmin}">
         <a th:href="@{/admin}">관리자 대시보드</a>
         <a th:href="@{/users/list}">회원관리</a>
@@ -30,14 +28,12 @@
         <a th:href="@{/users/logout}">로그아웃</a>
     </nav>
 
-    <!-- 일반 사용자 메뉴 -->
     <nav th:if="${session.loginUser != null and !session.isAdmin}">
         <a th:href="@{/quiz}">퀴즈 풀기</a>
         <a th:href="@{/results/my}">내 결과</a>
         <a th:href="@{/users/logout}">로그아웃</a>
     </nav>
 
-    <!-- 비로그인 메뉴 (관리자일 땐 안 보임) -->
     <nav th:if="${session.loginUser == null}">
         <a th:href="@{/users/login}">로그인</a>
         <a th:href="@{/users/register}">회원가입</a>

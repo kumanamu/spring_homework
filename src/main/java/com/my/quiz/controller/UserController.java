@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -21,37 +20,34 @@ public class UserController {
         this.userService = userService;
     }
 
+    /* ===================== 홈은 MainController에서 담당 ===================== */
 
-    // 회원가입 폼
-    @GetMapping("/register")
+    /* ===================== 회원가입 ===================== */
+    @GetMapping("/users/register")
     public String registerForm(Model model) {
-        // 바인딩 객체가 필요하면 주입
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserDto());
         }
         return "userRegister";
     }
 
-    // 회원가입 처리
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public String register(@ModelAttribute UserDto userDto, Model model) {
         try {
             userService.register(userDto);
-            return "redirect:/users/login";
+            // ✅ 가입 직후엔 승인 대기 화면으로 보냄
+            return "redirect:/users/pending";
         } catch (Exception e) {
             model.addAttribute("error", "회원가입 오류: " + e.getMessage());
             return "userRegister";
         }
     }
 
-    // 로그인 폼
-    @GetMapping("/login")
-    public String loginForm() {
-        return "userLogin";
-    }
+    /* ===================== 로그인/로그아웃 ===================== */
+    @GetMapping("/users/login")
+    public String loginForm() { return "userLogin"; }
 
-    // 로그인 처리 (관리자 페이지 렌더링은 AdminController가 담당)
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         HttpSession session,
@@ -62,39 +58,50 @@ public class UserController {
             UserDto admin = new UserDto();
             admin.setId(-1L);
             admin.setUsername("admin");
+            admin.setAdmin(true);
+            admin.setStatus(true);
             session.setAttribute("loginUser", admin);
             session.setAttribute("isAdmin", true);
-            return "redirect:/admin"; // 관리자 대시보드로만 리다이렉트
+            return "redirect:/admin";
         }
 
-        // 일반 사용자
+        // 일반 사용자 인증
         UserDto loginUser = userService.login(username, password);
         if (loginUser == null) {
             model.addAttribute("error", "아이디 또는 비밀번호가 올바르지 않습니다.");
             return "userLogin";
         }
 
+        // ✅ 미승인 사용자는 세션 부여 없이 대기 화면
+        if (Boolean.FALSE.equals(loginUser.getAdmin()) && Boolean.FALSE.equals(loginUser.getStatus())) {
+            return "redirect:/users/pending";
+        }
+
+        // 승인된 사용자만 세션
         session.setAttribute("loginUser", loginUser);
-        session.setAttribute("isAdmin", false);
-        return "redirect:/"; // 일반 메인으로
+        session.setAttribute("isAdmin", Boolean.TRUE.equals(loginUser.getAdmin()));
+        return "redirect:/";
     }
 
-    // 로그아웃
-    @GetMapping("/logout")
+    @GetMapping("/users/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
 
-    // (관리자 전용) 회원 목록
-    @GetMapping("/list")
+    /* ===================== 승인 대기 안내 ===================== */
+    @GetMapping("/users/pending")
+    public String pending() { return "pending"; }
+
+    /* ===================== (관리자 전용) 회원 목록 ===================== */
+    @GetMapping("/users/list")
     public String listUsers(HttpSession session, Model model) {
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
         if (isAdmin == null || !isAdmin) {
             model.addAttribute("error", "관리자만 접근 가능합니다.");
             return "main";
         }
-        List<UserDto> users = userService.findAll(); // ← 이제 컴파일 OK
+        List<UserDto> users = userService.findAll();
         model.addAttribute("users", users);
         return "userList";
     }

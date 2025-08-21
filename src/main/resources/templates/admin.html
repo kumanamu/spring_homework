@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8"/>
@@ -14,7 +14,6 @@
 <h1><span class="badge">✅ 관리자페이지입니다</span></h1>
 <p th:if="${adminMsg != null}" th:text="${adminMsg}"></p>
 
-<!-- 관리자 전용 네비게이션 -->
 <nav>
     <a th:href="@{/users/list}">회원관리 페이지</a>
     <a th:href="@{/quiz/manage}">퀴즈관리 (등록/수정/삭제)</a>
