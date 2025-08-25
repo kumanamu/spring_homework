@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     // 승인 대기 목록
     List<UserEntity> findAllByStatusFalse();
 
-    // 승인/거절 토글 (단건 업데이트)
+    // 승인/거절(회수) - 단건 업데이트
     @Modifying
     @Query("update UserEntity u set u.status = :approved where u.id = :userId")
     int updateStatusById(Long userId, boolean approved);

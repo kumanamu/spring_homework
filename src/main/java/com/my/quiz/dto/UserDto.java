@@ -11,8 +11,9 @@ public class UserDto {
     private String email;
     private String nickname;
 
-    private Boolean admin;    // 세션/권한 체크용
-    private Boolean status;   // 승인 여부
+    // 널 안전 & getXxx() 사용 위해 래퍼 타입
+    private Boolean admin;
+    private Boolean status;
 
     private Integer answerTrue;
     private Integer answerFalse;

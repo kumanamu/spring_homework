@@ -17,12 +17,13 @@
 <nav>
     <a th:href="@{/users/list}">회원관리 페이지</a>
     <a th:href="@{/quiz/manage}">퀴즈관리 (등록/수정/삭제)</a>
-    <a th:href="@{/results/all}">퀴즈결과 전체보기</a>
+    <a th:href="@{/results}">퀴즈결과 전체보기</a>
 </nav>
 
 <div class="card">
     <h3>회원별 결과 조회</h3>
-    <form th:action="@{/results/by-user}" method="get">
+    <!-- 통합 결과 페이지: /results?userId=... -->
+    <form th:action="@{/results}" method="get">
         <input type="number" name="userId" placeholder="회원 ID 입력" required/>
         <button type="submit">조회</button>
     </form>

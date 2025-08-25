@@ -2,38 +2,33 @@ package com.my.quiz.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
+
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "quiz")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "quizzes")
 public class QuizEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 문제 내용
+    /** 문제 내용 */
     @Column(nullable = false, length = 500)
     private String question;
 
-    // 정답 (예: "1"번, "2"번 등)
+    /** 정답: true=O, false=X */
     @Column(nullable = false)
-    private String answer;
+    private boolean answer;
 
-    // 보기 항목
-    @Column(nullable = false, length = 200)
-    private String option1;
+    @CreationTimestamp
+    @Column(nullable=false, updatable=false)
+    private LocalDateTime createdAt;
 
-    @Column(nullable = false, length = 200)
-    private String option2;
-
-    @Column(nullable = false, length = 200)
-    private String option3;
-
-    @Column(nullable = false, length = 200)
-    private String option4;
+    @UpdateTimestamp
+    @Column(nullable=false)
+    private LocalDateTime updatedAt;
 }

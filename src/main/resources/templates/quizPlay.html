@@ -1,0 +1,38 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>퀴즈 풀기</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 24px auto; }
+    .card { border:1px solid #eee; background:#fafafa; padding:16px; margin:12px 0; }
+    form { display:inline; }
+    .actions button { margin-right: 6px; }
+  </style>
+</head>
+<body>
+<h2>퀴즈 풀기</h2>
+<p>
+  <a th:href="@{/}">메인</a>
+  <a th:href="@{/results/my}">내 결과</a>
+</p>
+
+<div th:if="${#lists.isEmpty(quizzes)}">
+  <p>등록된 퀴즈가 없습니다.</p>
+</div>
+
+<div th:each="q : ${quizzes}" class="card">
+  <p><b th:text="${q.id}">1</b>. <span th:text="${q.question}">2+2=4?</span></p>
+  <div class="actions">
+    <form th:action="@{/quiz/{id}/answer(id=${q.id})}" method="post">
+      <input type="hidden" name="choice" value="O"/>
+      <button type="submit">O</button>
+    </form>
+    <form th:action="@{/quiz/{id}/answer(id=${q.id})}" method="post">
+      <input type="hidden" name="choice" value="X"/>
+      <button type="submit">X</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

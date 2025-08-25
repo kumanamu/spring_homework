@@ -23,6 +23,8 @@
   <tr>
     <th>ID</th>
     <th>아이디</th>
+    <th>이메일</th>
+    <th>닉네임</th>
     <th>승인</th>
     <th>관리자</th>
     <th>맞/틀</th>
@@ -34,6 +36,8 @@
   <tr th:each="u : ${users}">
     <td th:text="${u.id}">1</td>
     <td th:text="${u.username}">user</td>
+    <td th:text="${u.email}">user@ex.com</td>
+    <td th:text="${u.nickname}">nick</td>
     <td>
       <span th:classappend="${u.status} ? 'pill ok' : 'pill no'"
             th:text="${u.status} ? '승인됨' : '대기'">대기</span>

@@ -20,9 +20,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /* ===================== 홈은 MainController에서 담당 ===================== */
-
-    /* ===================== 회원가입 ===================== */
+    // 회원가입 폼
     @GetMapping("/users/register")
     public String registerForm(Model model) {
         if (!model.containsAttribute("user")) {
@@ -31,29 +29,30 @@ public class UserController {
         return "userRegister";
     }
 
+    // 회원가입 처리 → 승인 대기 안내로
     @PostMapping("/users/register")
     public String register(@ModelAttribute UserDto userDto, Model model) {
         try {
             userService.register(userDto);
-            // ✅ 가입 직후엔 승인 대기 화면으로 보냄
-            return "redirect:/users/pending";
+            return "redirect:/users/pending"; // ✅ 핵심
         } catch (Exception e) {
             model.addAttribute("error", "회원가입 오류: " + e.getMessage());
             return "userRegister";
         }
     }
 
-    /* ===================== 로그인/로그아웃 ===================== */
+    // 로그인 폼
     @GetMapping("/users/login")
     public String loginForm() { return "userLogin"; }
 
+    // 로그인 처리
     @PostMapping("/users/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         HttpSession session,
                         Model model) {
 
-        // 고정 관리자 계정
+        // 고정 관리자
         if ("admin".equals(username) && "1111".equals(password)) {
             UserDto admin = new UserDto();
             admin.setId(-1L);
@@ -65,7 +64,7 @@ public class UserController {
             return "redirect:/admin";
         }
 
-        // 일반 사용자 인증
+        // 일반 사용자
         UserDto loginUser = userService.login(username, password);
         if (loginUser == null) {
             model.addAttribute("error", "아이디 또는 비밀번호가 올바르지 않습니다.");
@@ -83,17 +82,18 @@ public class UserController {
         return "redirect:/";
     }
 
+    // 로그아웃
     @GetMapping("/users/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
 
-    /* ===================== 승인 대기 안내 ===================== */
+    // 승인 대기 안내
     @GetMapping("/users/pending")
     public String pending() { return "pending"; }
 
-    /* ===================== (관리자 전용) 회원 목록 ===================== */
+    // (관리자 전용) 회원 목록
     @GetMapping("/users/list")
     public String listUsers(HttpSession session, Model model) {
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");

@@ -25,7 +25,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         });
 
-        // 관리자/승인 기본값
+        // 기본값
         boolean isAdmin = false;
         boolean isApproved = false; // 미승인
 
@@ -35,7 +35,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .nickname(dto.getNickname())
                 .admin(isAdmin)
-                .status(isApproved)            // ✅ 핵심: 가입 직후 미승인
+                .status(isApproved)            // ✅ 가입 직후 미승인
                 .answerTrue(0)
                 .answerFalse(0)
                 .build();

@@ -1,0 +1,62 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>퀴즈 결과</title>
+    <style>
+        body { font-family: sans-serif; max-width: 1100px; margin: 24px auto; }
+        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        form { display:inline; }
+        .toolbar { display:flex; gap: 8px; align-items: center; }
+    </style>
+</head>
+<body>
+<h2>퀴즈 결과</h2>
+
+<div class="toolbar">
+    <a th:href="@{/}">메인</a>
+    <a th:href="@{/quiz}">퀴즈 풀기</a>
+
+    <!-- 관리자만 사용자 필터 표시 -->
+    <form th:if="${isAdmin}" th:action="@{/results}" method="get" style="margin-left:auto;">
+        <label>사용자 ID:
+            <input type="number" name="userId" th:value="${selectedUserId}">
+        </label>
+        <button type="submit">조회</button>
+        <a th:href="@{/results}">전체보기</a>
+    </form>
+
+    <!-- 일반 사용자는 본인 누적 점수 안내 -->
+    <span th:if="${!isAdmin}">내 점수: 맞춤 <b th:text="${me.answerTrue}">0</b> / 틀림 <b th:text="${me.answerFalse}">0</b></span>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>제출시간</th>
+        <th>사용자ID</th>
+        <th>아이디</th>
+        <th>퀴즈ID</th>
+        <th>문항</th>
+        <th>선택</th>
+        <th>정답</th>
+        <th>정오</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${list}">
+        <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2025-08-25</td>
+        <td th:text="${r.user.id}">2</td>
+        <td th:text="${r.user.username}">user1</td>
+        <td th:text="${r.quiz.id}">1</td>
+        <td th:text="${r.quiz.question}">2+2=4?</td>
+        <td th:text="${r.choice} ? 'O' : 'X'">O</td>
+        <td th:text="${r.quiz.answer} ? 'O' : 'X'">O</td>
+        <td th:text="${r.correct} ? '맞음' : '틀림'">맞음</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

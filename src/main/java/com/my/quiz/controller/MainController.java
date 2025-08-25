@@ -14,7 +14,7 @@ public class MainController {
         Object obj = session.getAttribute("loginUser");
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
 
-        // ✅ 로그인된 일반 사용자이며 미승인 상태면 메인 접근도 우회
+        // 로그인된 일반 사용자이며 미승인 상태면 메인 접근도 우회
         if (obj instanceof UserDto user
                 && (isAdmin == null || !isAdmin)
                 && Boolean.FALSE.equals(user.getStatus())) {

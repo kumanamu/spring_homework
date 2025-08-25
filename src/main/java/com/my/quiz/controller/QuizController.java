@@ -1,11 +1,12 @@
 package com.my.quiz.controller;
 
-import com.my.quiz.dto.QuizDto;
+import com.my.quiz.dto.QuizForm;
+import com.my.quiz.dto.UserDto;
 import com.my.quiz.entity.QuizEntity;
 import com.my.quiz.service.QuizService;
+import com.my.quiz.service.ResultService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,109 +14,128 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/quiz") // ✅ 템플릿에서 사용하는 경로와 일치시킴 (/quiz/manage 등)
+@RequiredArgsConstructor
 public class QuizController {
 
     private final QuizService quizService;
+    private final ResultService resultService;
 
-    @Autowired
-    public QuizController(QuizService quizService) {
-        this.quizService = quizService;
+    /* ===== 항상 newQuiz 바인딩 보장 ===== */
+    @ModelAttribute("newQuiz")
+    public QuizForm newQuizAttr() {
+        QuizForm form = new QuizForm();
+        form.setAnswer(Boolean.TRUE); // 기본값: O
+        return form;
     }
 
-    /** (선택) 모든 문제 JSON 조회 - 서비스 시그니처(getAll)와 일치 */
-    @GetMapping("/api")
-    @ResponseBody
-    public List<QuizEntity> getAllQuizzesApi() {
-        return quizService.getAll();
-    }
+    /* ===== 관리자: 퀴즈 관리 ===== */
 
-    /** (선택) 문제 추가(JSON) - 서비스 create(dto)와 일치하도록 조정 */
-    @PostMapping("/api")
-    @ResponseBody
-    public ResponseEntity<?> addQuizApi(@RequestParam String question,
-                                        @RequestParam String answer) {
-        QuizDto dto = new QuizDto();
-        dto.setQuestion(question);
-        dto.setAnswer(answer);
-        quizService.create(dto); // 서비스는 void 반환
-        return ResponseEntity.ok().build();
-    }
-
-    /** (선택) 랜덤 문제 JSON 하나 */
-    @GetMapping("/api/random")
-    @ResponseBody
-    public ResponseEntity<QuizEntity> getRandomQuizApi() {
-        List<QuizEntity> list = quizService.getRandomQuizzes(1);
-        QuizEntity one = list.isEmpty() ? null : list.get(0);
-        return ResponseEntity.ok(one);
-    }
-
-    // ===================== 관리자 화면 영역 (Thymeleaf) =====================
-
-    // 관리자: 문제 관리 화면
-    @GetMapping("/manage")
-    public String manage(HttpSession session, Model model) {
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin == null || !isAdmin) {
+    @GetMapping("/quiz/manage")
+    public String managePage(HttpSession session, Model model) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
             model.addAttribute("error", "관리자만 접근 가능합니다.");
             return "main";
         }
-        model.addAttribute("quizzes", quizService.getAll());
-        model.addAttribute("newQuiz", new QuizDto());
+        List<QuizEntity> quizzes = quizService.findAll();
+        model.addAttribute("quizzes", quizzes);
         return "quizManage";
     }
 
-    // 관리자: 문제 등록 (폼 전송)
-    @PostMapping("/create")
-    public String create(@ModelAttribute("newQuiz") QuizDto quizDto,
+    @GetMapping("/quiz/new")
+    public String newForm(HttpSession session, Model model,
+                          @ModelAttribute("newQuiz") QuizForm form) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
+            model.addAttribute("error", "관리자만 접근 가능합니다.");
+            return "main";
+        }
+        // form 은 @ModelAttribute 로 이미 존재
+        model.addAttribute("mode", "create");
+        return "quizForm";
+    }
+
+    @PostMapping("/quiz/new")
+    public String create(@ModelAttribute("newQuiz") QuizForm form,
                          HttpSession session, Model model) {
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin == null || !isAdmin) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
             model.addAttribute("error", "관리자만 접근 가능합니다.");
             return "main";
         }
-        quizService.create(quizDto);
-        return "redirect:/quiz/manage"; // ✅ 클래스 매핑과 일치
-    }
-
-    // 관리자: 수정 폼 열기
-    @GetMapping("/edit/{id}")
-    public String editForm(@PathVariable Long id, HttpSession session, Model model) {
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin == null || !isAdmin) {
-            model.addAttribute("error", "관리자만 접근 가능합니다.");
-            return "main";
-        }
-        model.addAttribute("quiz", quizService.findById(id));
-        model.addAttribute("quizzes", quizService.getAll()); // 리스트도 같이 보여주면 UX 좋음
-        model.addAttribute("newQuiz", new QuizDto());
-        return "quizManage";
-    }
-
-    // 관리자: 수정 처리
-    @PostMapping("/edit/{id}")
-    public String edit(@PathVariable Long id,
-                       @ModelAttribute QuizDto quizDto,
-                       HttpSession session, Model model) {
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin == null || !isAdmin) {
-            model.addAttribute("error", "관리자만 접근 가능합니다.");
-            return "main";
-        }
-        quizService.update(id, quizDto);
+        // (서버 검증이 있다면 실패 시 return "quizForm"; 하면 newQuiz 유지됨)
+        boolean answer = Boolean.TRUE.equals(form.getAnswer());
+        quizService.create(form.getQuestion(), answer);
         return "redirect:/quiz/manage";
     }
 
-    // 관리자: 삭제
-    @PostMapping("/delete/{id}")
-    public String delete(@PathVariable Long id, HttpSession session, Model model) {
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin == null || !isAdmin) {
+    @GetMapping("/quiz/{id}/edit")
+    public String editForm(@PathVariable Long id,
+                           HttpSession session,
+                           Model model,
+                           @ModelAttribute("newQuiz") QuizForm form) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
+            model.addAttribute("error", "관리자만 접근 가능합니다.");
+            return "main";
+        }
+        QuizEntity q = quizService.findById(id);
+        // 기존 값으로 폼 채우기 (기본 객체에 덮어쓰기)
+        form.setQuestion(q.getQuestion());
+        form.setAnswer(q.isAnswer());
+
+        model.addAttribute("mode", "edit");
+        model.addAttribute("quizId", q.getId());
+        return "quizForm";
+    }
+
+    @PostMapping("/quiz/{id}/edit")
+    public String update(@PathVariable Long id,
+                         @ModelAttribute("newQuiz") QuizForm form,
+                         HttpSession session, Model model) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
+            model.addAttribute("error", "관리자만 접근 가능합니다.");
+            return "main";
+        }
+        boolean answer = Boolean.TRUE.equals(form.getAnswer());
+        quizService.update(id, form.getQuestion(), answer);
+        return "redirect:/quiz/manage";
+    }
+
+    @PostMapping("/quiz/{id}/delete")
+    public String delete(@PathVariable Long id,
+                         HttpSession session, Model model) {
+        if (!Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
             model.addAttribute("error", "관리자만 접근 가능합니다.");
             return "main";
         }
         quizService.delete(id);
         return "redirect:/quiz/manage";
+    }
+
+    /* ===== 사용자: 퀴즈 풀기 ===== */
+
+    @GetMapping("/quiz")
+    public String playPage(HttpSession session, Model model) {
+        UserDto login = (UserDto) session.getAttribute("loginUser");
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (login == null) return "redirect:/users/login";
+        if (Boolean.FALSE.equals(isAdmin) && Boolean.FALSE.equals(login.getStatus())) {
+            return "redirect:/users/pending";
+        }
+        List<QuizEntity> quizzes = quizService.findAll();
+        model.addAttribute("quizzes", quizzes);
+        return "quizPlay";
+    }
+
+    @PostMapping("/quiz/{id}/answer")
+    public String submit(@PathVariable Long id,
+                         @RequestParam("choice") String choiceStr,
+                         HttpSession session) {
+        UserDto login = (UserDto) session.getAttribute("loginUser");
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (login == null) return "redirect:/users/login";
+        if (Boolean.FALSE.equals(isAdmin) && Boolean.FALSE.equals(login.getStatus())) {
+            return "redirect:/users/pending";
+        }
+        boolean choice = "O".equalsIgnoreCase(choiceStr) || "true".equalsIgnoreCase(choiceStr);
+        resultService.submitAnswer(login.getId(), id, choice);
+        return "redirect:/quiz";
     }
 }
