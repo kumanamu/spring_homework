@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>퀴즈결과 보기</title>
+    <style>
+        body { font-family: sans-serif; max-width: 1000px; margin: 24px auto; }
+        nav a { margin-right: 10px; }
+        .tabs { display: flex; gap: 8px; margin: 16px 0; }
+        .tabs a, .tabs button { padding: 8px 12px; border: 1px solid #ddd; background: #f9f9f9; text-decoration: none; cursor: pointer; }
+        .tabs .active { background: #e8f5ff; border-color: #bcdfff; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f3f3f3; }
+        form.inline { display: inline-flex; gap: 8px; align-items: center; }
+        .empty { color: #666; }
+    </style>
+</head>
+<body>
+<nav>
+    <a th:href="@{/}">메인</a>
+    <a th:href="@{/admin}">관리자</a>
+</nav>
+
+<h2>퀴즈결과 보기</h2>
+
+<div class="tabs">
+    <!-- 전체보기 탭 -->
+    <a th:href="@{/results}"
+       th:classappend="${mode} == 'all' ? ' active' : ''">전체 결과</a>
+
+    <!-- 회원별보기 탭 (GET /results?userId=...) -->
+    <form class="inline" th:action="@{/results}" method="get">
+        <input type="number" name="userId" placeholder="회원 ID 입력"
+               th:value="${param.userId}"/>
+        <button type="submit"
+                th:classappend="${mode} == 'user' ? ' active' : ''">회원별 결과</button>
+    </form>
+</div>
+
+<!-- 전체결과 -->
+<section th:if="${mode} == 'all'">
+    <table>
+        <thead>
+        <tr>
+            <th>결과 ID</th>
+            <th>회원</th>
+            <th>퀴즈</th>
+            <th>정답여부</th>
+            <th>제출시각</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${results}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.userNickname}">닉네임</td>
+            <td th:text="${r.quizQuestion}">문항</td>
+            <td th:text="${r.correct ? '정답' : '오답'}">정답</td>
+            <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(results)}">
+            <td colspan="5" class="empty" style="text-align:center;">결과가 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- 회원별결과 -->
+<section th:if="${mode} == 'user'">
+    <p>
+        회원 ID: <b th:text="${selectedUserId}">-</b>
+        <span th:if="${#lists.isEmpty(resultsByUser)}" class="empty">(결과 없음)</span>
+    </p>
+
+    <table th:if="${!#lists.isEmpty(resultsByUser)}">
+        <thead>
+        <tr>
+            <th>결과 ID</th>
+            <th>퀴즈</th>
+            <th>정답여부</th>
+            <th>제출시각</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${resultsByUser}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.quizQuestion}">문항</td>
+            <td th:text="${r.correct ? '정답' : '오답'}">정답</td>
+            <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">-</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+</body>
+</html>

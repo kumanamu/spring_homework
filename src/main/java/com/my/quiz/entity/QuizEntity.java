@@ -31,4 +31,15 @@ public class QuizEntity {
     @UpdateTimestamp
     @Column(nullable=false)
     private LocalDateTime updatedAt;
+
+    // QuizEntity.java
+    @Column(nullable = true)
+    private String option1;
+    @Column(nullable = true)
+    private String option2;
+    @Column(nullable = true)
+    private String option3;
+    @Column(nullable = true)
+    private String option4;
+
 }

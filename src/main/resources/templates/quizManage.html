@@ -26,7 +26,7 @@
 
 <!-- 새 퀴즈 등록 -->
 <h3>새 퀴즈 등록</h3>
-<form th:action="@{/quiz/create}" method="post" th:object="${newQuiz}">
+<form th:action="@{/quizzes/new}" method="post" th:object="${newQuiz}">
   <input type="text" th:field="*{question}" placeholder="문제" required/>
   <input type="text" th:field="*{answer}" placeholder="정답" required/>
   <button type="submit">등록</button>
@@ -49,7 +49,7 @@
     <td th:text="${q.question}">문제</td>
     <td th:text="${q.answer}">정답</td>
     <td class="actions">
-      <a th:href="@{/quiz/edit/{id}(id=${q.id})}">수정</a>
+      <a th:href="@{/quizzes/edit/{id}(id=${q.id})}">수정</a>
       <form th:action="@{/quiz/delete/{id}(id=${q.id})}" method="post" style="margin-left:8px;">
         <button type="submit" onclick="return confirm('삭제할까요?')">삭제</button>
       </form>

@@ -24,11 +24,11 @@
 <div th:each="q : ${quizzes}" class="card">
   <p><b th:text="${q.id}">1</b>. <span th:text="${q.question}">2+2=4?</span></p>
   <div class="actions">
-    <form th:action="@{/quiz/{id}/answer(id=${q.id})}" method="post">
+    <form th:action="@{/quizzes/{id}/answer(id=${q.id})}" method="post">
       <input type="hidden" name="choice" value="O"/>
       <button type="submit">O</button>
     </form>
-    <form th:action="@{/quiz/{id}/answer(id=${q.id})}" method="post">
+    <form th:action="@{/quizzes/{id}/answer(id=${q.id})}" method="post">
       <input type="hidden" name="choice" value="X"/>
       <button type="submit">X</button>
     </form>

@@ -13,6 +13,7 @@ public interface QuizRepository extends JpaRepository<QuizEntity, Long> {
 
 
 // 랜덤 문제 추출
-    @Query(value = "SELECT * FROM quiz ORDER BY RAND() LIMIT ?1", nativeQuery = true)
-    List<QuizEntity> findRandomQuizzes(int limit);
+@Query(value = "SELECT * FROM quizzes ORDER BY RAND() LIMIT ?1", nativeQuery = true)
+List<QuizEntity> findRandomQuizzes(int limit);
+
 }

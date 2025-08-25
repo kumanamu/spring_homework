@@ -15,16 +15,16 @@
 <nav>
     <a th:href="@{/}">메인</a>
     <a th:href="@{/results/my}" th:if="${session.loginUser != null and !session.isAdmin}">내 결과</a>
-    <a th:href="@{/quiz/manage}" th:if="${session.isAdmin}">퀴즈 관리</a>
+    <a th:href="@{/quizzes/manage}" th:if="${session.isAdmin}">퀴즈 관리</a>
 </nav>
 
 <h2>퀴즈 풀기</h2>
 
-<div th:if="${quiz == null}" class="empty">등록된 문제가 없습니다.</div>
+<div th:if="${quizzes == null}" class="empty">등록된 문제가 없습니다.</div>
 
-<form th:if="${quiz != null}" th:action="@{/quiz/submit}" method="post">
-    <p><b>[문제]</b> <span th:text="${quiz.question}">문제 내용</span></p>
-    <input type="hidden" name="quizId" th:value="${quiz.id}"/>
+<form th:if="${quizzes != null}" th:action="@{/quizzes/submit}" method="post">
+    <p><b>[문제]</b> <span th:text="${quizzes.question}">문제 내용</span></p>
+    <input type="hidden" name="quizId" th:value="${quizzes.id}"/>
     <input type="text" name="userAnswer" placeholder="정답을 입력하세요" required/>
     <button type="submit">제출</button>
 </form>
